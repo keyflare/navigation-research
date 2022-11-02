@@ -12,21 +12,30 @@ import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import com.keyflare.navigationResearch.core.base.BaseViewModel
+import com.keyflare.navigationResearch.core.navigation.common.RootDestinations
 import com.keyflare.navigationResearch.core.navigation.common.INavigator
-import com.keyflare.navigationResearch.core.navigation.jetpack.CoreDestinations
-import com.keyflare.navigationResearch.core.navigation.jetpack.injectViewModel
+import com.keyflare.navigationResearch.core.navigation.jetpack.injectViewModelJetpack
+import com.keyflare.navigationResearch.core.navigation.odyssey.injectViewModelOdyssey
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import ru.alexgladkov.odyssey.compose.extensions.screen
+import ru.alexgladkov.odyssey.compose.navigation.RootComposeBuilder
 import javax.inject.Inject
 
 ///////// API /////////
 
 fun NavGraphBuilder.splashGraph(route: String, navigator: INavigator) {
     composable(route = route) {
-        SplashScreen(viewModel = injectViewModel(navigator = navigator))
+        SplashScreen(viewModel = injectViewModelJetpack(navigator = navigator))
+    }
+}
+
+fun RootComposeBuilder.splashGraph(name: String) {
+    screen(name = name) {
+        SplashScreen(viewModel = injectViewModelOdyssey())
     }
 }
 
@@ -39,7 +48,7 @@ private class SplashViewModel @Inject constructor() : BaseViewModel<Unit, Unit>(
     fun startLoading() {
         viewModelScope.launch {
             delay(1000)
-            navigator?.navigate(CoreDestinations.bottomNav, clearBackstack = true)
+            navigator?.navigate(RootDestinations.bottomNav, clearBackstack = true)
         }
     }
 }

@@ -6,19 +6,28 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.graphics.Color
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
+import com.keyflare.navigationResearch.core.navigation.common.RootDestinations
 import com.keyflare.navigationResearch.core.navigation.common.INavigator
-import com.keyflare.navigationResearch.core.navigation.jetpack.CoreDestinations
-import com.keyflare.navigationResearch.core.navigation.jetpack.injectViewModel
+import com.keyflare.navigationResearch.core.navigation.jetpack.injectViewModelJetpack
+import com.keyflare.navigationResearch.core.navigation.odyssey.injectViewModelOdyssey
 import com.keyflare.navigationResearch.core.stub.DataLoadingScreenStub
 import com.keyflare.navigationResearch.core.stub.DataLoadingViewModelStub
 import dagger.hilt.android.lifecycle.HiltViewModel
+import ru.alexgladkov.odyssey.compose.extensions.screen
+import ru.alexgladkov.odyssey.compose.helpers.FlowBuilder
 import javax.inject.Inject
 
 ///////// API /////////
 
 fun NavGraphBuilder.thirdTabGraph(route: String, navigator: INavigator) {
     composable(route = route) {
-        ThirdTabScreen(viewModel = injectViewModel(navigator))
+        ThirdTabScreen(viewModel = injectViewModelJetpack(navigator))
+    }
+}
+
+fun FlowBuilder.thirdTabGraph(name: String) {
+    screen(name = name) {
+        ThirdTabScreen(viewModel = injectViewModelOdyssey())
     }
 }
 
@@ -27,7 +36,7 @@ fun NavGraphBuilder.thirdTabGraph(route: String, navigator: INavigator) {
 @HiltViewModel
 private class ThirdTabScreenViewModel @Inject constructor() : DataLoadingViewModelStub() {
     override fun goNextScreen() {
-        navigator?.navigate(CoreDestinations.splash)
+        navigator?.navigate(RootDestinations.splash)
     }
 }
 

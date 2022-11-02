@@ -8,10 +8,14 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
 import com.keyflare.navigationResearch.core.navigation.common.INavigator
-import com.keyflare.navigationResearch.core.navigation.jetpack.injectViewModel
+import com.keyflare.navigationResearch.core.navigation.jetpack.injectViewModelJetpack
+import com.keyflare.navigationResearch.core.navigation.odyssey.injectViewModelOdyssey
 import com.keyflare.navigationResearch.core.stub.DataLoadingScreenStub
 import com.keyflare.navigationResearch.core.stub.DataLoadingViewModelStub
 import dagger.hilt.android.lifecycle.HiltViewModel
+import ru.alexgladkov.odyssey.compose.extensions.flow
+import ru.alexgladkov.odyssey.compose.extensions.screen
+import ru.alexgladkov.odyssey.compose.navigation.RootComposeBuilder
 import javax.inject.Inject
 
 ///////// API /////////
@@ -28,13 +32,27 @@ fun NavGraphBuilder.firstFeatureGraph(route: String, navigator: INavigator) {
         route = route,
     ) {
         composable(route = FirstFeatureDestinations.screenA) {
-            FirstFeatureAScreen(viewModel = injectViewModel(navigator))
+            FirstFeatureAScreen(viewModel = injectViewModelJetpack(navigator))
         }
         composable(route = FirstFeatureDestinations.screenB) {
-            FirstFeatureBScreen(viewModel = injectViewModel(navigator))
+            FirstFeatureBScreen(viewModel = injectViewModelJetpack(navigator))
         }
         composable(route = FirstFeatureDestinations.screenC) {
-            FirstFeatureCScreen(viewModel = injectViewModel(navigator))
+            FirstFeatureCScreen(viewModel = injectViewModelJetpack(navigator))
+        }
+    }
+}
+
+fun RootComposeBuilder.firstFeatureGraph(name: String) {
+    flow(name = name) {
+        screen(name = FirstFeatureDestinations.screenA) {
+            FirstFeatureAScreen(viewModel = injectViewModelOdyssey())
+        }
+        screen(name = FirstFeatureDestinations.screenB) {
+            FirstFeatureBScreen(viewModel = injectViewModelOdyssey())
+        }
+        screen(name = FirstFeatureDestinations.screenC) {
+            FirstFeatureCScreen(viewModel = injectViewModelOdyssey())
         }
     }
 }

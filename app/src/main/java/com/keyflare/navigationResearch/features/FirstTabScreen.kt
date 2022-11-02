@@ -6,33 +6,42 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.graphics.Color
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
+import com.keyflare.navigationResearch.core.navigation.common.RootDestinations
 import com.keyflare.navigationResearch.core.navigation.common.INavigator
-import com.keyflare.navigationResearch.core.navigation.jetpack.CoreDestinations
-import com.keyflare.navigationResearch.core.navigation.jetpack.injectViewModel
+import com.keyflare.navigationResearch.core.navigation.jetpack.injectViewModelJetpack
+import com.keyflare.navigationResearch.core.navigation.odyssey.injectViewModelOdyssey
 import com.keyflare.navigationResearch.core.stub.DataLoadingScreenStub
 import com.keyflare.navigationResearch.core.stub.DataLoadingViewModelStub
 import dagger.hilt.android.lifecycle.HiltViewModel
+import ru.alexgladkov.odyssey.compose.extensions.screen
+import ru.alexgladkov.odyssey.compose.helpers.FlowBuilder
 import javax.inject.Inject
 
 ///////// API /////////
 
 fun NavGraphBuilder.firstTabGraph(route: String, navigator: INavigator) {
     composable(route = route) {
-        FirstTabScreen(viewModel = injectViewModel(navigator))
+        FirstTabScreen(viewModel = injectViewModelJetpack(navigator))
+    }
+}
+
+fun FlowBuilder.firstTabGraph(name: String) {
+    screen(name = name) {
+        FirstTabScreen(viewModel = injectViewModelOdyssey())
     }
 }
 
 ///////// INTERNAL /////////
 
 @HiltViewModel
-private class FirstTabScreenViewModel @Inject constructor() : DataLoadingViewModelStub() {
+ class FirstTabScreenViewModel @Inject constructor() : DataLoadingViewModelStub() {
     override fun goNextScreen() {
-        navigator?.navigate(CoreDestinations.feature1)
+        navigator?.navigate(RootDestinations.feature1, isRootDestination = true)
     }
 }
 
 @Composable
-private fun FirstTabScreen(viewModel: FirstTabScreenViewModel) {
+ fun FirstTabScreen(viewModel: FirstTabScreenViewModel) {
     val state by viewModel.state.collectAsState()
 
     DataLoadingScreenStub(

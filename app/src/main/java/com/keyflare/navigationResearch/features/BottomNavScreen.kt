@@ -4,12 +4,14 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.NavHost
@@ -18,12 +20,19 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.keyflare.navigationResearch.core.base.BaseViewModel
 import com.keyflare.navigationResearch.core.navigation.common.INavigator
-import com.keyflare.navigationResearch.core.navigation.jetpack.injectViewModel
+import com.keyflare.navigationResearch.core.navigation.jetpack.injectViewModelJetpack
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import ru.alexgladkov.odyssey.compose.extensions.bottomNavigation
+import ru.alexgladkov.odyssey.compose.extensions.tab
+import ru.alexgladkov.odyssey.compose.navigation.RootComposeBuilder
+import ru.alexgladkov.odyssey.compose.navigation.bottom_bar_navigation.BottomNavConfiguration
+import ru.alexgladkov.odyssey.compose.navigation.bottom_bar_navigation.TabConfiguration
+import ru.alexgladkov.odyssey.compose.navigation.bottom_bar_navigation.TabItem
+import ru.alexgladkov.odyssey.compose.navigation.bottom_bar_navigation.TabsNavModel
 import javax.inject.Inject
 
 /////////// API ////////////
@@ -36,7 +45,24 @@ object BottomNavDestinations {
 
 fun NavGraphBuilder.bottomNavGraph(route: String, navigator: INavigator) {
     composable(route = route) {
-        BottomNavScreen(viewModel = injectViewModel(navigator), navigator = navigator)
+        BottomNavScreen(viewModel = injectViewModelJetpack(navigator), navigator = navigator)
+    }
+}
+
+fun RootComposeBuilder.bottomNavGraph(name: String) {
+    bottomNavigation(
+        name = name,
+        tabsNavModel = BottomConfiguration(),
+    ) {
+        tab(BottomNavTab(BottomNavDestinations.tab1)) {
+            firstTabGraph(name = BottomNavDestinations.tab1)
+        }
+        tab(BottomNavTab(BottomNavDestinations.tab2)) {
+            secondTabGraph(name = BottomNavDestinations.tab2)
+        }
+        tab(BottomNavTab(BottomNavDestinations.tab3)) {
+            thirdTabGraph(name = BottomNavDestinations.tab3)
+        }
     }
 }
 
@@ -64,6 +90,8 @@ class BottomNavScreenViewModel @Inject constructor() :
         _state.update { it.copy(selectedTab = tab) }
     }
 }
+
+// jetpack navigation
 
 @Composable
 fun BottomNavScreen(
@@ -125,4 +153,27 @@ fun BottomNavScreen(
             thirdTabGraph(route = BottomNavDestinations.tab3, navigator)
         }
     }
+}
+
+// odyssey
+
+class BottomNavTab(private val title: String) : TabItem() {
+    override val configuration: TabConfiguration
+        @Composable get() = TabConfiguration(
+            title = title,
+            selectedIcon = rememberVectorPainter(image = Icons.Default.Star),
+            unselectedIcon = rememberVectorPainter(image = Icons.Default.Star),
+        )
+}
+
+class BottomConfiguration : TabsNavModel<BottomNavConfiguration>() {
+    override val navConfiguration: BottomNavConfiguration
+        @Composable
+        get() {
+            return BottomNavConfiguration(
+                backgroundColor = MaterialTheme.colors.background,
+                selectedColor = MaterialTheme.colors.primary,
+                unselectedColor = MaterialTheme.colors.onSurface
+            )
+        }
 }

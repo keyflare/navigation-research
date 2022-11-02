@@ -8,11 +8,12 @@ import com.keyflare.navigationResearch.core.navigation.common.INavigator
 class JetpackNavigator(private val navController: NavHostController) : INavigator {
 
     override fun navigate(
-        route: String,
+        screen: String,
         singleTop: Boolean,
         clearBackstack: Boolean,
+        isRootDestination: Boolean,
     ) {
-        navController.navigate(route) {
+        navController.navigate(screen) {
             if (clearBackstack) {
                 popUpTo(navController.graph.id) {
                     inclusive = true

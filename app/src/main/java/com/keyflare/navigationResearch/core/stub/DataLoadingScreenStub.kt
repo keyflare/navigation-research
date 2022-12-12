@@ -10,6 +10,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 
 @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
@@ -18,6 +19,7 @@ fun DataLoadingScreenStub(
     color: Color,
     label: String,
     isLoading: Boolean,
+    error: Boolean,
     onBack: () -> Unit,
     onForward: (() -> Unit)? = null,
 ) {
@@ -50,11 +52,14 @@ fun DataLoadingScreenStub(
                 if (isLoading) {
                     CircularProgressIndicator()
                 }
+                if (error) {
+                    Text(text = "ERROR!!!")
+                }
             }
             if (onForward != null) {
                 Button(
                     onClick = onForward,
-                    enabled = !isLoading,
+                    enabled = !isLoading && !error,
                     modifier = Modifier
                         .padding(16.dp)
                         .fillMaxWidth()
@@ -64,4 +69,17 @@ fun DataLoadingScreenStub(
             }
         }
     }
+}
+
+@Preview
+@Composable
+private fun DataLoadingScreenStubPreview() {
+    DataLoadingScreenStub(
+        color = Color.Red,
+        label = "ScreenStub",
+        isLoading = true,
+        error = false,
+        onBack = {},
+        onForward = {},
+    )
 }

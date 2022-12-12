@@ -3,41 +3,33 @@ package com.keyflare.navigationResearch.core.base
 import androidx.annotation.CallSuper
 import androidx.compose.runtime.Stable
 import androidx.lifecycle.ViewModel
-import com.keyflare.navigationResearch.core.navigation.common.INavigator
-import kotlinx.coroutines.flow.StateFlow
 
 @Stable
-abstract class BaseViewModel<State, Args> : ViewModel() {
-    abstract val state: StateFlow<State>
+abstract class BaseViewModel<NavArgs, NavAction> : ViewModel() {
 
-    protected var args: Args? = null
+    protected var args: NavArgs? = null
         private set
 
-    protected var navigator: INavigator? = null
+    protected var navigator: NavAction? = null
         private set
 
-    // TODO check if leaks possible
-    fun init(navigator: INavigator, args: Args?): BaseViewModel<State, Args> {
+    protected open fun onNewArgs(args: NavArgs?) = Unit
+
+    fun init(args: NavArgs?, navigator: NavAction): BaseViewModel<NavArgs, NavAction> {
         this.navigator = navigator
-        args?.let { handleArgs(it) }
+        handleArgs(args)
         return this
     }
 
     @CallSuper
-    open fun onExitComposition() {
+    fun onExitComposition() {
         navigator = null
     }
 
-    open fun onBack() {
-        navigator?.popBackStack()
-    }
-
-    protected open fun onNewArgs() = Unit
-
-    private fun handleArgs(args: Args) {
-        if (this.args == null || this.args != args) {
+    private fun handleArgs(args: NavArgs?) {
+        if (this.args != args) {
             this.args = args
-            onNewArgs()
+            onNewArgs(args)
         }
     }
 }

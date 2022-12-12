@@ -5,76 +5,91 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.graphics.Color
 import androidx.navigation.NavGraphBuilder
-import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
 import com.keyflare.navigationResearch.core.navigation.common.INavigator
-import com.keyflare.navigationResearch.core.navigation.jetpack.injectViewModelJetpack
-import com.keyflare.navigationResearch.core.navigation.odyssey.injectViewModelOdyssey
+import com.keyflare.navigationResearch.core.navigation.jetpack.NavInfo
+import com.keyflare.navigationResearch.core.navigation.jetpack.screen
 import com.keyflare.navigationResearch.core.stub.DataLoadingScreenStub
 import com.keyflare.navigationResearch.core.stub.DataLoadingViewModelStub
 import dagger.hilt.android.lifecycle.HiltViewModel
-import ru.alexgladkov.odyssey.compose.extensions.flow
-import ru.alexgladkov.odyssey.compose.extensions.screen
-import ru.alexgladkov.odyssey.compose.navigation.RootComposeBuilder
+import kotlinx.coroutines.flow.update
 import javax.inject.Inject
 
 ///////// API /////////
 
 object FirstFeatureDestinations {
-    const val screenA = "screenA"
-    const val screenB = "screenB"
-    const val screenC = "screenC"
+    val firstFeature = "firstFeature"
+    val screenA = NavInfo<FirstFeatureArgs>(screenId = "screenA")
+    val screenB = NavInfo<FirstFeatureArgs>(screenId = "screenB")
+    val screenC = NavInfo<FirstFeatureArgs>(screenId = "screenC")
 }
 
-fun NavGraphBuilder.firstFeatureGraph(route: String, navigator: INavigator) {
+fun NavGraphBuilder.firstFeatureGraph(navigator: INavigator) {
     navigation(
-        startDestination = FirstFeatureDestinations.screenA,
-        route = route,
+        startDestination = FirstFeatureDestinations.screenA.screenId,
+        route = FirstFeatureDestinations.firstFeature,
     ) {
-        composable(route = FirstFeatureDestinations.screenA) {
-            FirstFeatureAScreen(viewModel = injectViewModelJetpack(navigator))
-        }
-        composable(route = FirstFeatureDestinations.screenB) {
-            FirstFeatureBScreen(viewModel = injectViewModelJetpack(navigator))
-        }
-        composable(route = FirstFeatureDestinations.screenC) {
-            FirstFeatureCScreen(viewModel = injectViewModelJetpack(navigator))
-        }
-    }
-}
-
-fun RootComposeBuilder.firstFeatureGraph(name: String) {
-    flow(name = name) {
-        screen(name = FirstFeatureDestinations.screenA) {
-            FirstFeatureAScreen(viewModel = injectViewModelOdyssey())
-        }
-        screen(name = FirstFeatureDestinations.screenB) {
-            FirstFeatureBScreen(viewModel = injectViewModelOdyssey())
-        }
-        screen(name = FirstFeatureDestinations.screenC) {
-            FirstFeatureCScreen(viewModel = injectViewModelOdyssey())
-        }
+        screen<FirstFeatureArgs, INavigator, FirstFeatureAScreenViewModel>(
+            navAction = navigator,
+            screen = FirstFeatureDestinations.screenA,
+            composable = { FirstFeatureAScreen(it) }
+        )
+        screen<FirstFeatureArgs, INavigator, FirstFeatureBScreenViewModel>(
+            navAction = navigator,
+            screen = FirstFeatureDestinations.screenB,
+            composable = { FirstFeatureBScreen(it) }
+        )
+        screen<FirstFeatureArgs, INavigator, FirstFeatureCScreenViewModel>(
+            navAction = navigator,
+            screen = FirstFeatureDestinations.screenC,
+            composable = { FirstFeatureCScreen(it) },
+        )
     }
 }
 
 ///////// INTERNAL /////////
 
-@HiltViewModel
-private class FirstFeatureAScreenViewModel @Inject constructor() : DataLoadingViewModelStub() {
+data class FirstFeatureArgs(
+    val title: String,
+    val subtitle: String,
+)
+
+private open class FirstFeatureScreenBaseViewModel(
+    private val nextScreen: NavInfo<FirstFeatureArgs>?
+) : DataLoadingViewModelStub<FirstFeatureArgs>() {
+
+    override fun onLoaded() {
+        if (args == null) {
+            _state.update { it.copy(loading = false, error = true) }
+        } else {
+            _state.update { it.copy(loading = false) }
+        }
+    }
+
     override fun goNextScreen() {
-        navigator?.navigate(FirstFeatureDestinations.screenB)
+        nextScreen?.let {
+            navigator?.navigate(
+                nextScreen,
+                FirstFeatureArgs(
+                    title = "from ${javaClass.simpleName}",
+                    subtitle = "test",
+                )
+            )
+        }
     }
 }
 
 @HiltViewModel
-private class FirstFeatureBScreenViewModel @Inject constructor() : DataLoadingViewModelStub() {
-    override fun goNextScreen() {
-        navigator?.navigate(FirstFeatureDestinations.screenC)
-    }
-}
+private class FirstFeatureAScreenViewModel @Inject constructor() :
+    FirstFeatureScreenBaseViewModel(FirstFeatureDestinations.screenB)
 
 @HiltViewModel
-private class FirstFeatureCScreenViewModel @Inject constructor() : DataLoadingViewModelStub()
+private class FirstFeatureBScreenViewModel @Inject constructor() :
+    FirstFeatureScreenBaseViewModel(FirstFeatureDestinations.screenC)
+
+@HiltViewModel
+private class FirstFeatureCScreenViewModel @Inject constructor() :
+    FirstFeatureScreenBaseViewModel(null)
 
 @Composable
 private fun FirstFeatureAScreen(viewModel: FirstFeatureAScreenViewModel) {
@@ -84,6 +99,7 @@ private fun FirstFeatureAScreen(viewModel: FirstFeatureAScreenViewModel) {
         color = Color.White,
         label = "A",
         isLoading = state.loading,
+        error = state.error,
         onBack = viewModel::onBack,
         onForward = viewModel::goNextScreen,
     )
@@ -97,6 +113,7 @@ private fun FirstFeatureBScreen(viewModel: FirstFeatureBScreenViewModel) {
         color = Color.White,
         label = "B",
         isLoading = state.loading,
+        error = state.error,
         onBack = viewModel::onBack,
         onForward = viewModel::goNextScreen,
     )
@@ -110,6 +127,7 @@ private fun FirstFeatureCScreen(viewModel: FirstFeatureCScreenViewModel) {
         color = Color.White,
         label = "C",
         isLoading = state.loading,
+        error = state.error,
         onBack = viewModel::onBack,
     )
 }

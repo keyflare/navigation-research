@@ -14,14 +14,14 @@ fun InitNavigationJetpack() {
 
     NavHost(
         navController = navController,
-        startDestination = RootDestinations.splash,
+        startDestination = SplashScreenDestinations.splash.screenId,
     ) {
-        buildMainGraph(JetpackNavigator(navController))
+        buildMainGraph(NavigatorImpl(navController))
     }
 }
 
 private fun NavGraphBuilder.buildMainGraph(navigator: INavigator) {
-    splashGraph(route = RootDestinations.splash, navigator)
-    bottomNavGraph(route = RootDestinations.bottomNav, navigator)
-    firstFeatureGraph(route = RootDestinations.feature1, navigator)
+    splashGraph(navigator)
+    bottomNavGraph(navigator)
+    firstFeatureGraph(navigator)
 }

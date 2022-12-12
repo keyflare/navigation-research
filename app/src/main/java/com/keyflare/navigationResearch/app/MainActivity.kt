@@ -4,7 +4,6 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import com.keyflare.navigationResearch.core.navigation.jetpack.InitNavigationJetpack
-import com.keyflare.navigationResearch.core.navigation.odyssey.initOdysseyNavigation
 import dagger.hilt.android.AndroidEntryPoint
 
 const val useOdyssey = false
@@ -15,7 +14,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         if (useOdyssey) {
-            initOdysseyNavigation()
+//            initOdysseyNavigation()
         } else {
             setContent {
                 InitNavigationJetpack()

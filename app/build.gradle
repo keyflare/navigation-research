@@ -71,4 +71,7 @@ dependencies {
 
     implementation("io.github.alexgladkov:odyssey-core:1.0.1")
     implementation("io.github.alexgladkov:odyssey-compose:1.0.1")
+
+    def gson_version = '2.8.9'
+    implementation "com.google.code.gson:gson:$gson_version"
 }

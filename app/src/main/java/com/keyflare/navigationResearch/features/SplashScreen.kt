@@ -28,7 +28,7 @@ object SplashScreenDestinations {
 
 fun NavGraphBuilder.splashGraph(navigator: INavigator) {
     screenNoArgs<INavigator, SplashViewModel>(
-        navAction = navigator,
+        navigator = navigator,
         screen = SplashScreenDestinations.splash,
         composable = { SplashScreen(it) }
     )
@@ -44,7 +44,7 @@ private class SplashViewModel @Inject constructor() : BaseViewModel<NoNavArgs, I
             navigator?.navigate(
                 screen = BottomNavDestinations.bottomNav,
                 navArgs = BottomNavArgs(tabToOpen = BottomNavScreenState.Tab.TAB1),
-                clearBackstack = true,
+                clearBackstack = INavigator.ClearBackstack.All,
             )
         }
     }

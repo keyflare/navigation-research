@@ -9,21 +9,27 @@ interface INavigator {
         screen: NavInfo<NavArgs>,
         navArgs: NavArgs,
         singleTop: Boolean = false,
-        clearBackstack: Boolean = false,
+        clearBackstack: ClearBackstack = ClearBackstack.DoNotClear,
     )
 
     fun navigate(
         screen: NavInfo<NoNavArgs>,
         singleTop: Boolean = false,
-        clearBackstack: Boolean = false,
+        clearBackstack: ClearBackstack = ClearBackstack.DoNotClear,
     )
 
     fun navigate(
         screenId: String,
         navArgsJson: String,
         singleTop: Boolean = false,
-        clearBackstack: Boolean = false,
+        clearBackstack: ClearBackstack = ClearBackstack.DoNotClear,
     )
 
     fun popBackStack()
+
+    sealed interface ClearBackstack {
+        object DoNotClear : ClearBackstack
+        object All : ClearBackstack
+        data class Until(val screenId: String, val inclusive: Boolean) : ClearBackstack
+    }
 }

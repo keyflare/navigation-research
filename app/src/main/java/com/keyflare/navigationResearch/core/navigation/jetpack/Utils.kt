@@ -1,5 +1,6 @@
 package com.keyflare.navigationResearch.core.navigation.jetpack
 
+import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.Immutable
@@ -11,21 +12,31 @@ import com.keyflare.navigationResearch.core.base.BaseViewModel
 @Immutable
 object NoNavArgs
 
-@Suppress("unused")
-class NavInfo<NavArgs>(val screenId: String)
+const val NAV_ARGS_KEY = "args"
 
-inline fun <reified NavArgs, NavAction, reified VM : BaseViewModel<NavArgs, NavAction>>
-        NavGraphBuilder.screen(
-    navAction: NavAction,
+@Suppress("unused")
+class NavInfo<NavArgs>(val screenId: String) {
+    val route get() = createRoute(screenId)
+}
+
+internal fun createRoute(screenId: String): String {
+    return "${screenId}/{$NAV_ARGS_KEY}"
+}
+
+inline fun <reified NavArgs, Navigator, reified VM : BaseViewModel<NavArgs, Navigator>> NavGraphBuilder.screen(
+    navigator: Navigator,
     screen: NavInfo<NavArgs>,
     crossinline composable: @Composable (VM) -> Unit,
 ) {
-    val navArgsKey = "args"
+    composable(route = screen.route) {
+        val args = if (NoNavArgs is NavArgs) {
+            NoNavArgs
+        } else {
+            (it.arguments?.getString(NAV_ARGS_KEY) ?: "").restoreObject<NavArgs>()
+        }
 
-    composable("${screen.screenId}/{$navArgsKey}") {
-        val args = (it.arguments?.getString(navArgsKey) ?: "").restoreObject<NavArgs>()
         val viewModel = hiltViewModel<VM>()
-        viewModel.init(args, navAction)
+        viewModel.init(args, navigator)
 
         DisposableEffect(key1 = Unit) {
             onDispose { viewModel.onExitComposition() }
@@ -35,21 +46,12 @@ inline fun <reified NavArgs, NavAction, reified VM : BaseViewModel<NavArgs, NavA
     }
 }
 
-inline fun <NavAction, reified VM : BaseViewModel<NoNavArgs, NavAction>> NavGraphBuilder.screenNoArgs(
-    navAction: NavAction,
+inline fun <Navigator, reified VM : BaseViewModel<NoNavArgs, Navigator>> NavGraphBuilder.screenNoArgs(
+    navigator: Navigator,
     screen: NavInfo<NoNavArgs>,
     crossinline composable: @Composable (VM) -> Unit,
 ) {
-    composable(screen.screenId) {
-        val viewModel = hiltViewModel<VM>()
-        viewModel.init(NoNavArgs, navAction)
-
-        DisposableEffect(key1 = Unit) {
-            onDispose { viewModel.onExitComposition() }
-        }
-
-        composable(viewModel)
-    }
+    screen(navigator, screen, composable)
 }
 
 @Composable

@@ -36,7 +36,7 @@ data class BottomNavArgs(val tabToOpen: BottomNavScreenState.Tab)
 
 fun NavGraphBuilder.bottomNavGraph(navigator: INavigator) {
     screen<BottomNavArgs, Unit, BottomNavScreenViewModel>(
-        navAction = Unit,
+        navigator = Unit,
         screen = BottomNavDestinations.bottomNav,
         composable = { BottomNavScreen(it, navigator) }
     )

@@ -4,6 +4,7 @@ import androidx.compose.runtime.Stable
 import androidx.navigation.NavHostController
 import com.google.gson.Gson
 import com.keyflare.navigationResearch.core.navigation.common.INavigator
+import com.keyflare.navigationResearch.core.navigation.common.INavigator.ClearBackstack
 
 @Stable
 class NavigatorImpl(private val navController: NavHostController) : INavigator {
@@ -11,12 +12,13 @@ class NavigatorImpl(private val navController: NavHostController) : INavigator {
     override fun navigate(
         screen: NavInfo<NoNavArgs>,
         singleTop: Boolean,
-        clearBackstack: Boolean,
+        clearBackstack: ClearBackstack,
     ) {
-        navigateInternal(
-            route = screen.screenId,
+        navigate(
+            screen = screen,
+            navArgs = NoNavArgs,
             singleTop = singleTop,
-            clearBackstack = clearBackstack,
+            clearBackstack = clearBackstack
         )
     }
 
@@ -24,7 +26,7 @@ class NavigatorImpl(private val navController: NavHostController) : INavigator {
         screen: NavInfo<NavArgs>,
         navArgs: NavArgs,
         singleTop: Boolean,
-        clearBackstack: Boolean
+        clearBackstack: ClearBackstack,
     ) {
         val argsJson = navArgs.toSravniJson()
         navigateInternal(
@@ -34,12 +36,11 @@ class NavigatorImpl(private val navController: NavHostController) : INavigator {
         )
     }
 
-    // TODO maybe annotation to OptIn it's usage
     override fun navigate(
         screenId: String,
         navArgsJson: String,
         singleTop: Boolean,
-        clearBackstack: Boolean
+        clearBackstack: ClearBackstack,
     ) {
         navigateInternal(
             route = "$screenId/$navArgsJson",
@@ -51,12 +52,20 @@ class NavigatorImpl(private val navController: NavHostController) : INavigator {
     private fun navigateInternal(
         route: String,
         singleTop: Boolean,
-        clearBackstack: Boolean,
+        clearBackstack: ClearBackstack,
     ) {
         navController.navigate(route = route) {
-            if (clearBackstack) {
-                popUpTo(navController.graph.id) {
-                    inclusive = true
+            when (clearBackstack) {
+                is ClearBackstack.DoNotClear -> Unit
+                is ClearBackstack.All -> {
+                    popUpTo(navController.graph.id) {
+                        inclusive = true
+                    }
+                }
+                is ClearBackstack.Until -> {
+                    popUpTo(route = createRoute(clearBackstack.screenId)) {
+                        inclusive = clearBackstack.inclusive
+                    }
                 }
             }
             launchSingleTop = singleTop

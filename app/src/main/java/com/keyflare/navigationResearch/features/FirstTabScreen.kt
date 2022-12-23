@@ -29,7 +29,7 @@ fun NavGraphBuilder.firstTabGraph(route: String, navigator: INavigator) {
 @HiltViewModel
  class FirstTabScreenViewModel @Inject constructor() : DataLoadingViewModelStub<Unit>() {
     override fun goNextScreen() {
-        navigator?.navigate(FirstFeatureDestinations.screenA, FirstFeatureArgs("title", "subtitle"))
+        navigator?.navigate(FirstFeatureDestinations.screenA)
     }
 }
 
